@@ -1,0 +1,8 @@
+size=5  # matrix 5*5
+class lines_and_dots:
+    
+    def __init__(self):
+        
+        self.horizontal =[[0 for _ in range(size - 1)] for _ in range(size)]
+
+        self.vertical = [[0 for _ in range(size)] for _ in range(size - 1)]
