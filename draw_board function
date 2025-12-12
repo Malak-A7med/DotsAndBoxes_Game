@@ -1,0 +1,25 @@
+    def draw_board(self):
+        print("\n=== Board ===\n")
+    
+        for r in range(size):
+            
+            line = ""
+            for c in range(size):
+                line += "•"
+                if c < size - 1:
+                    if self.horizontal[r][c] == 1:
+                        line += "──"  
+                    else:
+                        line += "  " 
+            print(line)
+    
+            if r < size - 1:
+                line = ""
+                for c in range(size):
+                    if self.vertical[r][c] == 1:
+                        line += "│  "   
+                    else:
+                        line += "   "  
+                print(line)
+    
+        print("\n======================\n")
