@@ -1,11 +1,10 @@
-  def available_action(self):
-        actions=[]
-        for rows in range(size):
-            for colums in range(size-1):
-                if self.horizontal [rows][colums]==0:
-                    actions.append(("H",rows , colums))
-        for rows in range (size-1):
-            for colums in range (size):
-                if self.vertical[rows][colums]==0:
-                    actions.append(("V",rows , colums))
-        return actions
+def available_actions(self, state):
+        H, V, _, _, _ = state
+        actions = []
+        for r in range(size):
+            for c in range(size - 1):
+                if H[r][c] == 0: actions.append(("H", r, c))
+        for r in range(size - 1):
+            for c in range(size):
+                if V[r][c] == 0: actions.append(("V", r, c))
+        return actions
