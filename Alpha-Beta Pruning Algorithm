@@ -1,0 +1,27 @@
+def alphabeta(self, state, depth, alpha, beta):
+        res = self.check_terminal(state)
+        if res != "Not terminal": return res*1000, None
+        if depth == 0: return self.evaluate(state), None
+        actions = self.available_actions(state)
+        turn = self.current_player(state)
+        best_move = None
+        if turn == 's':
+            max_eval = -math.inf
+            for action in actions:
+                val, _ = self.alphabeta(self.take_action(state, action), depth-1, alpha, beta)
+                if val > max_eval:
+                    max_eval = val
+                    best_move = action
+                alpha = max(alpha, max_eval)
+                if beta <= alpha: break
+            return max_eval, best_move
+        else:
+            min_eval = math.inf
+            for action in actions:
+                val, _ = self.alphabeta(self.take_action(state, action), depth-1, alpha, beta)
+                if val < min_eval:
+                    min_eval = val
+                    best_move = action
+                beta = min(beta, min_eval)
+                if beta <= alpha: break
+            return min_eval, best_move
