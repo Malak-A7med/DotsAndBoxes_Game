@@ -1,0 +1,22 @@
+# ================= GAME LOOP =================
+game = lines_and_dots()
+state = game.initial_grid
+running = True
+
+while running:
+    clock.tick(30)
+    game.draw_gui(state)
+
+    if game.check_terminal(state) != "Not terminal":
+        result = game.check_terminal(state)
+        game.show_game_over(result, state[5], state[6])
+        running = False  # تقفل بعد عرض النتيجة
+        continue
+
+    if game.current_player(state) == 'f':
+        state = game.human_play_gui(state)
+    else:
+        pygame.time.wait(600)
+        state = game.computer_play_gui(state)
+
+pygame.quit()
