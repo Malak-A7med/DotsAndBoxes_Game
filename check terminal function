@@ -1,7 +1,7 @@
 def check_terminal(self, state):
-        H, V, f_score, s_score, _ = state
+        H, V, _, _, _, f_score, s_score, _ = state
         total_lines = sum(sum(row) for row in H) + sum(sum(row) for row in V)
-        max_lines = size*(size-1)*2
+        max_lines = size * (size - 1) * 2
         if total_lines == max_lines:
             if s_score > f_score: return 1
             elif f_score > s_score: return -1
