@@ -1,0 +1,26 @@
+def human_play_gui(self, state):
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit(); exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = event.pos
+                    # check horizontal lines
+                    for r in range(size):
+                        for c in range(size-1):
+                            x1, y1 = PADDING+c*CELL, PADDING+r*CELL
+                            x2, y2 = PADDING+(c+1)*CELL, PADDING+r*CELL
+                            if x1-10 < mx < x2+10 and y1-10 < my < y1+10:
+                                if state[0][r][c] == 0:
+                                    new_state = self.take_action(state, ("H", r, c))
+                                    return new_state
+                    # check vertical lines
+                    for r in range(size-1):
+                        for c in range(size):
+                            x1, y1 = PADDING+c*CELL, PADDING+r*CELL
+                            x2, y2 = x1, PADDING+(r+1)*CELL
+                            if x1-10 < mx < x1+10 and y1-10 < my < y2+10:
+                                if state[1][r][c] == 0:
+                                    new_state = self.take_action(state, ("V", r, c))
+                                    return new_state
