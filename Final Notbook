@@ -1,0 +1,278 @@
+import pygame
+import math
+
+# ================= إعدادات اللعبة =================
+size = 5  # 5x5 نقاط → 4x4 صناديق
+CELL = 80
+PADDING = 60
+WIDTH = HEIGHT = CELL * (size - 1) + 2 * PADDING
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 80, 80)       # خطوط + صندوق Human
+BLUE = (80, 160, 255)     # خطوط + صندوق AI
+ORANGE = (255, 160, 60)   # (مش مستخدم دلوقتي)
+GREEN = (80, 220, 100)    # (مش مستخدم دلوقتي)
+
+pygame.init()
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Dots and Boxes - Human vs AI")
+font_small = pygame.font.SysFont('comicsansms', 28)
+font_big = pygame.font.SysFont('comicsansms', 60)
+font_medium = pygame.font.SysFont('comicsansms', 36)
+clock = pygame.time.Clock()
+
+class lines_and_dots:
+    def _init_(self):
+        self.horizontal = [[0 for _ in range(size - 1)] for _ in range(size)]
+        self.vertical = [[0 for _ in range(size)] for _ in range(size - 1)]
+        
+        # للـ GUI فقط: مين رسم الخطوط والصناديق
+        self.h_owners = [[0 for _ in range(size - 1)] for _ in range(size)]
+        self.v_owners = [[0 for _ in range(size)] for _ in range(size - 1)]
+        self.box_owners = [[0 for _ in range(size - 1)] for _ in range(size - 1)]
+        
+        self.first_player_score = 0   # Human
+        self.second_player_score = 0  # AI
+        self.turn = 'f'  # f = human, s = AI
+        
+        self.initial_grid = self.get_state()
+
+    def get_state(self):
+        return (
+            [row[:] for row in self.horizontal],
+            [row[:] for row in self.vertical],
+            [row[:] for row in self.h_owners],
+            [row[:] for row in self.v_owners],
+            [row[:] for row in self.box_owners],
+            self.first_player_score,
+            self.second_player_score,
+            self.turn
+        )
+
+    def current_player(self, state):
+        return state[7]
+
+    def available_actions(self, state):
+        H, V = state[0], state[1]
+        actions = []
+        for r in range(size):
+            for c in range(size - 1):
+                if H[r][c] == 0: actions.append(("H", r, c))
+        for r in range(size - 1):
+            for c in range(size):
+                if V[r][c] == 0: actions.append(("V", r, c))
+        return actions
+
+    def check_terminal(self, state):
+        H, V, _, _, _, f_score, s_score, _ = state
+        total_lines = sum(sum(row) for row in H) + sum(sum(row) for row in V)
+        max_lines = size * (size - 1) * 2
+        if total_lines == max_lines:
+            if s_score > f_score: return 1
+            elif f_score > s_score: return -1
+            else: return 0
+        return "Not terminal"
+
+    def take_action(self, state, action):
+        H, V, h_own, v_own, box_own, f_score, s_score, turn = state
+        new_H = [row[:] for row in H]
+        new_V = [row[:] for row in V]
+        new_h_own = [row[:] for row in h_own]
+        new_v_own = [row[:] for row in v_own]
+        new_box_own = [row[:] for row in box_own]
+        new_f_score, new_s_score = f_score, s_score
+        new_turn = turn
+        
+        typ, r, c = action
+        owner = 1 if turn == 'f' else 2  # 1=Human, 2=AI
+        
+        if typ == "H":
+            new_H[r][c] = 1
+            new_h_own[r][c] = owner
+        else:
+            new_V[r][c] = 1
+            new_v_own[r][c] = owner
+
+        points = 0
+        if typ == 'H':
+            if r > 0 and new_H[r-1][c] and new_V[r-1][c] and new_V[r-1][c+1]:
+                points += 1
+                new_box_own[r-1][c] = owner
+            if r < size-1 and new_H[r+1][c] and new_V[r][c] and new_V[r][c+1]:
+                points += 1
+                new_box_own[r][c] = owner
+        else:
+            if c > 0 and new_V[r][c-1] and new_H[r][c-1] and new_H[r+1][c-1]:
+                points += 1
+                new_box_own[r][c-1] = owner
+            if c < size-1 and new_V[r][c+1] and new_H[r][c] and new_H[r+1][c]:
+                points += 1
+                new_box_own[r][c] = owner
+
+        if points > 0:
+            if turn == 'f':
+                new_f_score += points
+            else:
+                new_s_score += points
+        else:
+            new_turn = 's' if turn == 'f' else 'f'
+
+        return (new_H, new_V, new_h_own, new_v_own, new_box_own, new_f_score, new_s_score, new_turn)
+
+    def evaluate(self, state):
+        return state[6] - state[5]  # AI - Human
+
+    def alphabeta(self, state, depth, alpha, beta):
+        res = self.check_terminal(state)
+        if res != "Not terminal": return res*1000, None
+        if depth == 0: return self.evaluate(state), None
+        actions = self.available_actions(state)
+        turn = self.current_player(state)
+        best_move = None
+        if turn == 's':
+            max_eval = -math.inf
+            for action in actions:
+                val, _ = self.alphabeta(self.take_action(state, action), depth-1, alpha, beta)
+                if val > max_eval:
+                    max_eval = val
+                    best_move = action
+                alpha = max(alpha, max_eval)
+                if beta <= alpha: break
+            return max_eval, best_move
+        else:
+            min_eval = math.inf
+            for action in actions:
+                val, _ = self.alphabeta(self.take_action(state, action), depth-1, alpha, beta)
+                if val < min_eval:
+                    min_eval = val
+                    best_move = action
+                beta = min(beta, min_eval)
+                if beta <= alpha: break
+            return min_eval, best_move
+
+    def draw_gui(self, state):
+        H, V, h_own, v_own, box_own, f_score, s_score, turn = state
+        win.fill(BLACK)
+
+        # النقاط
+        for r in range(size):
+            for c in range(size):
+                pygame.draw.circle(win, WHITE, (PADDING + c*CELL, PADDING + r*CELL), 8)
+
+        # الخطوط الأفقية
+        for r in range(size):
+            for c in range(size-1):
+                if H[r][c]:
+                    color = BLUE if h_own[r][c] == 1 else RED
+                    pygame.draw.line(win, color, (PADDING+c*CELL, PADDING+r*CELL), (PADDING+(c+1)*CELL, PADDING+r*CELL), 6)
+
+        # الخطوط الرأسية
+        for r in range(size-1):
+            for c in range(size):
+                if V[r][c]:
+                    color = BLUE if v_own[r][c] == 1 else RED
+                    pygame.draw.line(win, color, (PADDING+c*CELL, PADDING+r*CELL), (PADDING+c*CELL, PADDING+(r+1)*CELL), 6)
+
+        # الصناديق: أحمر للـ Human، أزرق للـ AI
+        for r in range(size-1):
+            for c in range(size-1):
+                if box_own[r][c] != 0:
+                    color = BLUE if box_own[r][c] == 1 else RED
+                    s = pygame.Surface((CELL-20, CELL-20))
+                    s.set_alpha(160)  # شفافية خفيفة
+                    s.fill(color)
+                    win.blit(s, (PADDING + c*CELL + 10, PADDING + r*CELL + 10))
+
+        # السكورات
+        p1img = font_small.render(f'Human: {f_score}', True, BLUE)
+        p2img = font_small.render(f'AI: {s_score}', True, RED)
+        win.blit(p1img, (20, HEIGHT-50))
+        win.blit(p2img, (WIDTH - p2img.get_width() - 20, HEIGHT-50))
+
+        # الدور
+        turn_color = BLUE if turn == 'f' else RED
+        turn_text = font_small.render(f"{'Human' if turn=='f' else 'AI'}'s Turn", True, turn_color)
+        win.blit(turn_text, (WIDTH//2 - turn_text.get_width()//2, 15))
+
+        pygame.display.update()
+
+    def human_play_gui(self, state):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mx, my = event.pos
+                    tolerance = 25
+
+                    for r in range(size):
+                        for c in range(size-1):
+                            x1 = PADDING + c*CELL
+                            x2 = PADDING + (c+1)*CELL
+                            y = PADDING + r*CELL
+                            if min(x1,x2)-tolerance < mx < max(x1,x2)+tolerance and y-tolerance < my < y+tolerance:
+                                if state[0][r][c] == 0:
+                                    return self.take_action(state, ("H", r, c))
+
+                    for r in range(size-1):
+                        for c in range(size):
+                            x = PADDING + c*CELL
+                            y1 = PADDING + r*CELL
+                            y2 = PADDING + (r+1)*CELL
+                            if x-tolerance < mx < x+tolerance and min(y1,y2)-tolerance < my < max(y1,y2)+tolerance:
+                                if state[1][r][c] == 0:
+                                    return self.take_action(state, ("V", r, c))
+
+    def computer_play_gui(self, state):
+        _, best_move = self.alphabeta(state, 4, -math.inf, math.inf)
+        if best_move:
+            return self.take_action(state, best_move)
+        return state
+
+    def show_game_over(self, result, human_score, ai_score):
+        win.fill(BLACK)
+
+        if result == 1:
+            text = "AI Won!"
+            color = RED
+        elif result == -1:
+            text = "You Won!"
+            color = BLUE
+        else:
+            text = "It's a Draw!"
+            color = WHITE
+
+        winner = font_big.render(text, True, color)
+        scores = font_medium.render(f"Human: {human_score}   |   AI: {ai_score}", True, WHITE)
+
+        win.blit(winner, (WIDTH//2 - winner.get_width()//2, HEIGHT//2 - 60))
+        win.blit(scores, (WIDTH//2 - scores.get_width()//2, HEIGHT//2 + 20))
+        pygame.display.update()
+
+        pygame.time.wait(5000)  # تستنى 5 ثواني وبعدين تقفل لوحدها
+
+
+# ================= GAME LOOP =================
+game = lines_and_dots()
+state = game.initial_grid
+running = True
+
+while running:
+    clock.tick(30)
+    game.draw_gui(state)
+
+    if game.check_terminal(state) != "Not terminal":
+        result = game.check_terminal(state)
+        game.show_game_over(result, state[5], state[6])
+        running = False  # تقفل بعد عرض النتيجة
+        continue
+
+    if game.current_player(state) == 'f':
+        state = game.human_play_gui(state)
+    else:
+        pygame.time.wait(600)
+        state = game.computer_play_gui(state)
+
+pygame.quit()
