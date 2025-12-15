@@ -1,2 +1,2 @@
 def evaluate(self, state):
-        return state[3] - state[2]
+        return state[6] - state[5]  # AI - Human
