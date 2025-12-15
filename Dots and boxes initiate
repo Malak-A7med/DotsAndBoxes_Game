@@ -1,6 +1,26 @@
 import pygame
-from copy import deepcopy
 import math
+
+# ================= إعدادات اللعبة =================
+size = 5  # 5x5 نقاط → 4x4 صناديق
+CELL = 80
+PADDING = 60
+WIDTH = HEIGHT = CELL * (size - 1) + 2 * PADDING
+
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 80, 80)       # خطوط + صندوق Human
+BLUE = (80, 160, 255)     # خطوط + صندوق AI
+ORANGE = (255, 160, 60)   # (مش مستخدم دلوقتي)
+GREEN = (80, 220, 100)    # (مش مستخدم دلوقتي)
+
+pygame.init()
+win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Dots and Boxes - Human vs AI")
+font_small = pygame.font.SysFont('comicsansms', 28)
+font_big = pygame.font.SysFont('comicsansms', 60)
+font_medium = pygame.font.SysFont('comicsansms', 36)
+clock = pygame.time.Clock()
 
 class lines_and_dots:
 
