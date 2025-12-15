@@ -23,7 +23,7 @@ font_medium = pygame.font.SysFont('comicsansms', 36)
 clock = pygame.time.Clock()
 
 class lines_and_dots:
-    def _init_(self):
+    def __init__(self):
         self.horizontal = [[0 for _ in range(size - 1)] for _ in range(size)]
         self.vertical = [[0 for _ in range(size)] for _ in range(size - 1)]
         
