@@ -23,13 +23,29 @@ font_medium = pygame.font.SysFont('comicsansms', 36)
 clock = pygame.time.Clock()
 
 class lines_and_dots:
-
-    def __init__(self):
+    def _init_(self):
         self.horizontal = [[0 for _ in range(size - 1)] for _ in range(size)]
         self.vertical = [[0 for _ in range(size)] for _ in range(size - 1)]
-        self.first_player_score = 0
-        self.second_player_score = 0
-        self.turn = 'f'  # f = human, s = AI
-        self.initial_grid = (self.horizontal, self.vertical, self.first_player_score, self.second_player_score, self.turn)
+        
+        # للـ GUI فقط: مين رسم الخطوط والصناديق
         self.h_owners = [[0 for _ in range(size - 1)] for _ in range(size)]
         self.v_owners = [[0 for _ in range(size)] for _ in range(size - 1)]
+        self.box_owners = [[0 for _ in range(size - 1)] for _ in range(size - 1)]
+        
+        self.first_player_score = 0   # Human
+        self.second_player_score = 0  # AI
+        self.turn = 'f'  # f = human, s = AI
+        
+        self.initial_grid = self.get_state()
+
+    def get_state(self):
+        return (
+            [row[:] for row in self.horizontal],
+            [row[:] for row in self.vertical],
+            [row[:] for row in self.h_owners],
+            [row[:] for row in self.v_owners],
+            [row[:] for row in self.box_owners],
+            self.first_player_score,
+            self.second_player_score,
+            self.turn
+        )
