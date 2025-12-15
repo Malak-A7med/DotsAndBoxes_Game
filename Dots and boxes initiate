@@ -1,5 +1,6 @@
-size = 5  # matrix 5*5
-
+import pygame
+from copy import deepcopy
+import math
 
 class lines_and_dots:
 
@@ -8,4 +9,7 @@ class lines_and_dots:
         self.vertical = [[0 for _ in range(size)] for _ in range(size - 1)]
         self.first_player_score = 0
         self.second_player_score = 0
-        self.turn = 'f'  # f human, s computer
+        self.turn = 'f'  # f = human, s = AI
+        self.initial_grid = (self.horizontal, self.vertical, self.first_player_score, self.second_player_score, self.turn)
+        self.h_owners = [[0 for _ in range(size - 1)] for _ in range(size)]
+        self.v_owners = [[0 for _ in range(size)] for _ in range(size - 1)]
