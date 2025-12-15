@@ -1,2 +1,2 @@
 def current_player(self, state):
-        return state[4]
+        return state[7]
