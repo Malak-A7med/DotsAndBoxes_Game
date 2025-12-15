@@ -1,0 +1,2 @@
+def evaluate(self, state):
+        return state[3] - state[2]
