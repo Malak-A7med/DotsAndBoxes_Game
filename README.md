@@ -1,4 +1,4 @@
-# 🎮 Dots and Boxes — Human vs AI
+# 🎮 Dots and Boxes Game — Human vs AI
 
 A modern take on the classic Dots and Boxes board game implemented with Python and Pygame. Compete against a computer opponent powered by an Alpha-Beta Pruning AI — try to complete more boxes than the AI to win.
 
@@ -57,11 +57,12 @@ python main.py
 - Objective: maximize AI boxes while minimizing the human player's boxes
 
 ## Possible Improvements
-- Multiple difficulty levels
 - Local multiplayer mode
+- UI/UX polish and animations
 - Support for different board sizes
 - In-game restart button
-- UI/UX polish and animations
+- Multiple difficulty levels
+
 
 ## Contributing
 Contributions and suggestions are welcome. Please open an Issue or submit a Pull Request with improvements or bug fixes.
