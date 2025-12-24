@@ -1,2 +1,0 @@
-def evaluate(self, state):
-        return state[6] - state[5]  # AI - Human
